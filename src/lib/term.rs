@@ -32,27 +32,32 @@ impl TermType {
     }
 }
 
-pub fn bell<Range: std::ops::RangeBounds<f64>>(range: Range, center: f64, width: f64, slope: f64) -> impl Term {
-    TermImpl {
+pub fn bell<Range: std::ops::RangeBounds<f64>>(
+    range: Range,
+    center: f64,
+    width: f64,
+    slope: f64,
+) -> impl TermTrait {
+    Term {
         range,
         name: "bell".to_string(),
-        term_type: TermType::Bell(center, width, slope)
+        term_type: TermType::Bell(center, width, slope),
     }
 }
 
-pub trait Term {
+pub trait TermTrait {
     fn value(&self, x: f64) -> f64;
     fn min(&self) -> std::ops::Bound<&f64>;
     fn max(&self) -> std::ops::Bound<&f64>;
 }
 
-pub struct TermImpl<Range: std::ops::RangeBounds<f64>> {
+pub struct Term<Range: std::ops::RangeBounds<f64>> {
     range: Range,
     name: String,
     term_type: TermType,
 }
 
-impl<Range: std::ops::RangeBounds<f64>> Term for TermImpl<Range> {
+impl<Range: std::ops::RangeBounds<f64>> TermTrait for Term<Range> {
     fn value(&self, x: f64) -> f64 {
         if self.range.contains(&x) {
             self.term_type.value(x)
@@ -79,10 +84,10 @@ mod tests {
     #[test]
     fn test_constructors() {
         let constructed = bell(.., 2.0, 5.0, 10.0);
-        let expected = TermImpl{
+        let expected = TermImpl {
             range: ..,
             name: "bell".to_string(),
-            term_type: TermType::Bell(2.0, 5.0, 10.0)
+            term_type: TermType::Bell(2.0, 5.0, 10.0),
         };
 
         assert_eq!(constructed.min(), expected.range.start_bound());
