@@ -29,11 +29,11 @@ pub fn binary(x: f64, start: std::ops::Bound<f64>, positive: bool) -> f64 {
 }
 
 mod tests {
-    use std::collections::HashMap;
+    // use std::collections::HashMap;
 
-    use crate::assert_float_eq;
+    // use crate::assert_float_eq;
 
-    use super::*;
+    // use super::*;
 
     #[test]
     fn test_bell() {

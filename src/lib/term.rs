@@ -1,4 +1,5 @@
 use crate::math;
+// use crate::variable::VariableTrait;
 
 enum TermType {
     Bell(f64, f64, f64),
@@ -24,7 +25,7 @@ enum TermType {
 }
 
 impl TermType {
-    pub fn value(&self, x: f64) -> f64 {
+    pub fn membership(&self, x: f64) -> f64 {
         match &self {
             TermType::Bell(center, width, slope) => math::bell(x, *center, *width, *slope),
             TermType::Binary(start, positive) => math::binary(x, *start, *positive),
@@ -61,15 +62,18 @@ pub fn binary<Range: std::ops::RangeBounds<f64>>(
 
 pub trait TermTrait {
     fn name(&self) -> &String;
-    fn value(&self, x: f64) -> f64;
+    fn membership(&self, x: f64) -> f64;
     fn min(&self) -> std::ops::Bound<&f64>;
     fn max(&self) -> std::ops::Bound<&f64>;
+
+    // fn variable() -> Option<&VariableTrait<Term>>;
 }
 
 pub struct Term<Range: std::ops::RangeBounds<f64>> {
     range: Range,
     name: String,
     term_type: TermType,
+    // variable: Option<&VariableTrait<Term>>,
 }
 
 impl<Range: std::ops::RangeBounds<f64>> TermTrait for Term<Range> {
@@ -77,9 +81,9 @@ impl<Range: std::ops::RangeBounds<f64>> TermTrait for Term<Range> {
         &self.name
     }
 
-    fn value(&self, x: f64) -> f64 {
+    fn membership(&self, x: f64) -> f64 {
         if self.range.contains(&x) {
-            self.term_type.value(x)
+            self.term_type.membership(x)
         } else {
             0.0
         }
