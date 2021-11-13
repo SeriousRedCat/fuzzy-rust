@@ -2,7 +2,7 @@ use crate::math;
 
 enum TermType {
     Bell(f64, f64, f64),
-    Binary,
+    Binary(std::ops::Bound<f64>, bool),
     // Concave,
     // Constant,
     // Cosine,
@@ -27,12 +27,13 @@ impl TermType {
     pub fn value(&self, x: f64) -> f64 {
         match &self {
             TermType::Bell(center, width, slope) => math::bell(x, *center, *width, *slope),
-            TermType::Binary => 3.0,
+            TermType::Binary(start, positive) => math::binary(x, *start, *positive),
         }
     }
 }
 
 pub fn bell<Range: std::ops::RangeBounds<f64>>(
+    name: String,
     range: Range,
     center: f64,
     width: f64,
@@ -40,12 +41,26 @@ pub fn bell<Range: std::ops::RangeBounds<f64>>(
 ) -> impl TermTrait {
     Term {
         range,
-        name: "bell".to_string(),
+        name,
         term_type: TermType::Bell(center, width, slope),
     }
 }
 
+pub fn binary<Range: std::ops::RangeBounds<f64>>(
+    name: String,
+    range: Range,
+    start: std::ops::Bound<f64>,
+    positive: bool,
+) -> impl TermTrait {
+    Term {
+        range,
+        name,
+        term_type: TermType::Binary(start, positive),
+    }
+}
+
 pub trait TermTrait {
+    fn name(&self) -> &String;
     fn value(&self, x: f64) -> f64;
     fn min(&self) -> std::ops::Bound<&f64>;
     fn max(&self) -> std::ops::Bound<&f64>;
@@ -58,6 +73,10 @@ pub struct Term<Range: std::ops::RangeBounds<f64>> {
 }
 
 impl<Range: std::ops::RangeBounds<f64>> TermTrait for Term<Range> {
+    fn name(&self) -> &String {
+        &self.name
+    }
+
     fn value(&self, x: f64) -> f64 {
         if self.range.contains(&x) {
             self.term_type.value(x)
@@ -83,8 +102,8 @@ mod tests {
 
     #[test]
     fn test_constructors() {
-        let constructed = bell(.., 2.0, 5.0, 10.0);
-        let expected = TermImpl {
+        let constructed = bell("bell".to_string(), .., 2.0, 5.0, 10.0);
+        let expected = Term {
             range: ..,
             name: "bell".to_string(),
             term_type: TermType::Bell(2.0, 5.0, 10.0),
