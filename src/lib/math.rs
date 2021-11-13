@@ -37,7 +37,6 @@ mod tests {
 
     #[test]
     fn test_bell() {
-        
         let mut expected: std::vec::Vec<(f64, f64, f64, f64, f64)> = Default::default();
         expected.push((-3.0, 0.0, 5.0, 1.0, 0.7352941176470589));
 

@@ -1,6 +1,10 @@
-pub trait VariableTrait<T> {
+use crate::term::TermTrait;
+
+pub trait VariableTrait<T: TermTrait + ?Sized> {
     fn add_term(&mut self, term: T);
     fn set_value(&mut self, value: f64);
+    fn value(&self) -> f64;
+    fn fuzzify(&self, value: f64);
 }
 
 pub struct Variable<T> {
@@ -19,12 +23,18 @@ impl<T> Variable<T> {
     }
 }
 
-impl<T> VariableTrait<T> for Variable<T> {
+impl<T: TermTrait> VariableTrait<T> for Variable<T> {
     fn set_value(&mut self, value: f64) {
         self.value = value;
+    }
+
+    fn value(&self) -> f64 {
+        self.value
     }
 
     fn add_term(&mut self, term: T) {
         self.terms.push(term);
     }
+
+    fn fuzzify(&self, value: f64) {}
 }
