@@ -5,7 +5,7 @@ pub trait HedgeTrait {
 pub struct Hedge {}
 
 impl HedgeTrait for Hedge {
-    fn hedge(x: f64) -> f64 {
+    fn hedge(_x: f64) -> f64 {
         0f64
     }
 }

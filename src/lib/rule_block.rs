@@ -1,33 +1,22 @@
-use crate::norm::NormTrait;
+use crate::norm::Norm;
 use crate::rule::RuleTrait;
 
-pub trait RuleBlockTrait<Rule> {
-    fn add_rule(&mut self, rule: Rule);
+pub trait RuleBlockTrait {
+    fn add_rule(&mut self, rule: Box<dyn RuleTrait>);
     fn compute(&mut self);
 }
 
 #[derive(Default)]
-pub struct RuleBlock<Rule, Conjunction, Disjunction, Implication>
-where
-    Conjunction: NormTrait,
-    Disjunction: NormTrait,
-    Implication: NormTrait,
-{
-    rules: std::vec::Vec<Rule>,
+pub struct RuleBlock {
+    rules: std::vec::Vec<Box<dyn RuleTrait>>,
 
-    conjunction: Conjunction,
-    disjunction: Disjunction,
-    implication: Implication,
+    conjunction: Norm,
+    disjunction: Norm,
+    implication: Norm,
 }
 
-impl<Rule, Conjunction: NormTrait, Disjunction: NormTrait, Implication: NormTrait>
-    RuleBlock<Rule, Conjunction, Disjunction, Implication>
-{
-    pub fn new(
-        conjunction: Conjunction,
-        disjunction: Disjunction,
-        implication: Implication,
-    ) -> Self {
+impl RuleBlock {
+    pub fn new(conjunction: Norm, disjunction: Norm, implication: Norm) -> Self {
         RuleBlock {
             rules: Default::default(),
             conjunction,
@@ -37,10 +26,8 @@ impl<Rule, Conjunction: NormTrait, Disjunction: NormTrait, Implication: NormTrai
     }
 }
 
-impl<Rule: RuleTrait, Conjunction: NormTrait, Disjunction: NormTrait, Implication: NormTrait>
-    RuleBlockTrait<Rule> for RuleBlock<Rule, Conjunction, Disjunction, Implication>
-{
-    fn add_rule(&mut self, rule: Rule) {}
+impl RuleBlockTrait for RuleBlock {
+    fn add_rule(&mut self, _rule: Box<dyn RuleTrait>) {}
     fn compute(&mut self) {
         for rule in &self.rules {
             rule.activate_with(&self.conjunction, &self.disjunction);

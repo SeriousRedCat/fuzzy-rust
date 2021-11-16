@@ -1,5 +1,10 @@
 use crate::math;
-// use crate::variable::VariableTrait;
+use crate::variable::VariableTrait;
+use crate::SharedPtr;
+use crate::WeakPtr;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::rc::Weak;
 
 enum TermType {
     Bell(f64, f64, f64),
@@ -34,49 +39,58 @@ impl TermType {
 }
 
 pub fn bell<Range: std::ops::RangeBounds<f64>>(
+    variable: &SharedPtr<dyn VariableTrait>,
     name: String,
     range: Range,
     center: f64,
     width: f64,
     slope: f64,
-) -> impl TermTrait {
-    Term {
+) -> Term<Range> {
+    let term = Term {
         range,
         name,
         term_type: TermType::Bell(center, width, slope),
-    }
+        variable: Rc::downgrade(variable),
+    };
+    // variable.borrow_mut().add_term(term);
+    term
 }
 
-pub fn binary<Range: std::ops::RangeBounds<f64>>(
-    name: String,
-    range: Range,
-    start: std::ops::Bound<f64>,
-    positive: bool,
-) -> impl TermTrait {
-    Term {
-        range,
-        name,
-        term_type: TermType::Binary(start, positive),
-    }
-}
+// pub fn binary<'a, Range: std::ops::RangeBounds<f64>>(
+//     // variable: &'a impl VariableTrait,
+//     name: String,
+//     range: Range,
+//     start: std::ops::Bound<f64>,
+//     positive: bool,
+// ) -> Term<'a, Range> {
+//     Term {
+//         range,
+//         name,
+//         term_type: TermType::Binary(start, positive),
+//         variable: None,
+//     }
+// }
 
-pub trait TermTrait {
+pub trait TermTrait: std::fmt::Display {
     fn name(&self) -> &String;
     fn membership(&self, x: f64) -> f64;
     fn min(&self) -> std::ops::Bound<&f64>;
     fn max(&self) -> std::ops::Bound<&f64>;
 
-    // fn variable() -> Option<&VariableTrait<Term>>;
+    // fn set_parent(&mut self, parent: &Self::Variable);
+
+    fn variable(&self) -> Option<SharedPtr<dyn VariableTrait>>;
 }
 
 pub struct Term<Range: std::ops::RangeBounds<f64>> {
     range: Range,
     name: String,
     term_type: TermType,
-    // variable: Option<&VariableTrait<Term>>,
+    variable: WeakPtr<dyn VariableTrait>,
 }
 
 impl<Range: std::ops::RangeBounds<f64>> TermTrait for Term<Range> {
+    // type Variable = Variable;
     fn name(&self) -> &String {
         &self.name
     }
@@ -95,6 +109,20 @@ impl<Range: std::ops::RangeBounds<f64>> TermTrait for Term<Range> {
 
     fn max(&self) -> std::ops::Bound<&f64> {
         self.range.end_bound()
+    }
+
+    // fn set_parent(&mut self, parent: &Self::Variable) {
+    //     self.variable = Some(parent);
+    // }
+
+    fn variable(&self) -> Option<SharedPtr<dyn VariableTrait>> {
+        self.variable.upgrade()
+    }
+}
+
+impl<Range: std::ops::RangeBounds<f64>>  std::fmt::Display for Term<Range> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+write!(f, "{}", self.name)
     }
 }
 
